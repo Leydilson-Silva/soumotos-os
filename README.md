@@ -1,36 +1,39 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# SOUMOTOS - Ordem de Serviço
 
-## Getting Started
+Este é um projeto [Next.js](https://nextjs.org) para um formulário de Ordem de Serviço da oficina SOUMOTOS.
 
-First, run the development server:
+## Descrição
+
+O projeto consiste em um formulário detalhado para registrar a entrada de motocicletas na oficina. Ele inclui:
+
+*   **Dados da Motocicleta:** Modelo, placa, cor, quilometragem.
+*   **Controle da Oficina:** Mecânico responsável.
+*   **Checklist de Inspeção:** Uma lista de itens para verificar avarias visuais na motocicleta.
+*   **Serviços:** Campos para descrever os serviços solicitados, observações, serviços executados, parecer técnico e peças utilizadas.
+*   **Funcionalidades:**
+    *   Salva o preenchimento no navegador para evitar perdas de dados.
+    *   Botão para copiar o texto da Ordem de Serviço para a área de transferência.
+    *   Botão para compartilhar a Ordem de Serviço formatada no WhatsApp.
+
+## Tecnologias Utilizadas
+
+*   [Next.js](https://nextjs.org/)
+*   [React](https://reactjs.org/)
+*   [TypeScript](https://www.typescriptlang.org/)
+*   [Tailwind CSS](https://tailwindcss.com/)
+
+## Como Executar o Projeto
+
+Primeiro, instale as dependências:
+
+```bash
+npm install
+```
+
+Depois, rode o servidor de desenvolvimento:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Abra [http://localhost:3000](http://localhost:3000) no seu navegador para ver o resultado.
