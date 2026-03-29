@@ -33,24 +33,34 @@ const checklistItems = [
 ];
 
 export default function SOUMotosForm() {
-  const [formData, setFormData] = useState<FormData>(() => {
-    const savedForm = localStorage.getItem('soumotos_form');
-    return savedForm ? JSON.parse(savedForm) : {
+  const [formData, setFormData] = useState<FormData>({
       modelo: '', placa: '', cor: '', km: '', mecanico: '',
       servicosSolicitados: '', obsGerais: '', servicosExecutados: '',
       parecer: '', pecas: ''
-    };
-  });
+    });
 
-  const [checklist, setChecklist] = useState<ChecklistState>(() => {
-    const savedCheck = localStorage.getItem('soumotos_check');
-    return savedCheck ? JSON.parse(savedCheck) : {};
-  });
+  const [checklist, setChecklist] = useState<ChecklistState>({});
   const [copiado, setCopiado] = useState(false);
 
   useEffect(() => {
-    localStorage.setItem('soumotos_form', JSON.stringify(formData));
-    localStorage.setItem('soumotos_check', JSON.stringify(checklist));
+    const savedForm = localStorage.getItem('soumotos_form');
+    if (savedForm) {
+      setFormData(JSON.parse(savedForm));
+    }
+    const savedCheck = localStorage.getItem('soumotos_check');
+    if (savedCheck) {
+      setChecklist(JSON.parse(savedCheck));
+    }
+  }, []);
+
+  const isInitialMount = React.useRef(true);
+  useEffect(() => {
+    if (isInitialMount.current) {
+        isInitialMount.current = false;
+    } else {
+        localStorage.setItem('soumotos_form', JSON.stringify(formData));
+        localStorage.setItem('soumotos_check', JSON.stringify(checklist));
+    }
   }, [formData, checklist]);
 
   const handleCheckChange = (item: string) => {
