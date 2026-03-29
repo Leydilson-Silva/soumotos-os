@@ -30,17 +30,11 @@ export default function ClausulaUmForm({ modulos, periodoCurso, handleModuloUpda
       <div className="space-y-4">
         {modulosDesc.map((m) => (
           <div key={m.id} className="p-3 bg-white border border-zinc-100 rounded-lg shadow-sm space-y-3">
-            <div className="flex items-center gap-3">
-               <input 
-                type="checkbox" 
-                checked={modulos?.[m.id as keyof typeof modulos]?.sel || false}
-                onChange={(e) => handleModuloUpdate(m.id, 'sel', e.target.checked)}
-                className="w-4 h-4 accent-blue-900 cursor-pointer"
-              />
-              <span className="text-xs font-bold text-zinc-700 uppercase tracking-tighter italic">
-                {m.label}
-              </span>
-            </div>
+                        <div className="flex items-center gap-3">
+                          <span className="text-xs font-bold text-zinc-700 uppercase tracking-tighter italic">
+                            {m.label}
+                          </span>
+                        </div>
             
             <div className="grid grid-cols-3 gap-2">
               <Input 
