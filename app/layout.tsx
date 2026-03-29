@@ -26,6 +26,7 @@ export const metadata: Metadata = {
   description: "Sistema interno de checklist e OS para a SOUMOTOS",
   manifest: "/manifest.json",
   icons: {
+    icon: "/favicon.png",
     apple: "/icon-192x192.png", // Ícone para iOS
   },
   appleWebApp: {

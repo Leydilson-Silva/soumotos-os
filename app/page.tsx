@@ -33,30 +33,25 @@ const checklistItems = [
 ];
 
 export default function SOUMotosForm() {
-  const [formData, setFormData] = useState<FormData>({
-    modelo: '', placa: '', cor: '', km: '', mecanico: '',
-    servicosSolicitados: '', obsGerais: '', servicosExecutados: '',
-    parecer: '', pecas: ''
+  const [formData, setFormData] = useState<FormData>(() => {
+    const savedForm = localStorage.getItem('soumotos_form');
+    return savedForm ? JSON.parse(savedForm) : {
+      modelo: '', placa: '', cor: '', km: '', mecanico: '',
+      servicosSolicitados: '', obsGerais: '', servicosExecutados: '',
+      parecer: '', pecas: ''
+    };
   });
 
-  const [checklist, setChecklist] = useState<ChecklistState>({});
-  const [isLoaded, setIsLoaded] = useState(false);
+  const [checklist, setChecklist] = useState<ChecklistState>(() => {
+    const savedCheck = localStorage.getItem('soumotos_check');
+    return savedCheck ? JSON.parse(savedCheck) : {};
+  });
   const [copiado, setCopiado] = useState(false);
 
   useEffect(() => {
-    const savedForm = localStorage.getItem('soumotos_form');
-    const savedCheck = localStorage.getItem('soumotos_check');
-    if (savedForm) setFormData(JSON.parse(savedForm));
-    if (savedCheck) setChecklist(JSON.parse(savedCheck));
-    setIsLoaded(true);
-  }, []);
-
-  useEffect(() => {
-    if (isLoaded) {
-      localStorage.setItem('soumotos_form', JSON.stringify(formData));
-      localStorage.setItem('soumotos_check', JSON.stringify(checklist));
-    }
-  }, [formData, checklist, isLoaded]);
+    localStorage.setItem('soumotos_form', JSON.stringify(formData));
+    localStorage.setItem('soumotos_check', JSON.stringify(checklist));
+  }, [formData, checklist]);
 
   const handleCheckChange = (item: string) => {
     setChecklist((prev) => ({
@@ -124,7 +119,7 @@ export default function SOUMotosForm() {
       await navigator.clipboard.writeText(texto);
       setCopiado(true);
       setTimeout(() => setCopiado(false), 2000);
-    } catch (err) { alert("Erro ao copiar."); }
+    } catch { alert("Erro ao copiar."); }
   };
 
   const compartilharWhatsApp = () => {
@@ -133,7 +128,6 @@ export default function SOUMotosForm() {
     window.open(url, '_blank');
   };
 
-  if (!isLoaded) return <div className="min-h-screen bg-slate-100 flex items-center justify-center font-bold">Carregando SOUMOTOS...</div>;
 
   return (
     <div className="min-h-screen bg-slate-100 p-2 md:p-6 font-sans text-slate-900">
@@ -146,17 +140,17 @@ export default function SOUMotosForm() {
         <main className="p-4 md:p-8 space-y-8">
           <section className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {[
-              { label: "Modelo / Montadora", key: "modelo" },
-              { label: "Placa", key: "placa", extra: "uppercase font-mono" },
-              { label: "Cor", key: "cor" },
-              { label: "Quilometragem (KM)", key: "km", type: "number" },
-              { label: "Mecânico Responsável", key: "mecanico", extra: "bg-yellow-50 font-bold col-span-1 md:col-span-2" }
+              { label: "Modelo / Montadora", key: "modelo" as const },
+              { label: "Placa", key: "placa" as const, extra: "uppercase font-mono" },
+              { label: "Cor", key: "cor" as const },
+              { label: "Quilometragem (KM)", key: "km" as const, type: "number" },
+              { label: "Mecânico Responsável", key: "mecanico" as const, extra: "bg-yellow-50 font-bold col-span-1 md:col-span-2" }
             ].map((field) => (
               <div key={field.key} className={`flex flex-col gap-1 ${field.key === 'mecanico' ? 'md:col-span-2' : ''}`}>
                 <label className="text-[10px] font-black text-slate-500 ml-1 uppercase">{field.label}</label>
                 <input 
                   type={field.type || "text"}
-                  value={(formData as any)[field.key]} 
+                  value={formData[field.key]} 
                   className={`p-3 border border-slate-200 rounded-xl outline-none focus:border-yellow-400 transition-all ${field.extra || "bg-slate-50"}`}
                   onChange={e => setFormData({...formData, [field.key]: e.target.value})} 
                 />
@@ -186,17 +180,17 @@ export default function SOUMotosForm() {
 
           <section className="space-y-6">
              {[
-               { label: "Serviços Solicitados pelo Cliente", key: "servicosSolicitados", color: "text-blue-600" },
-               { label: "Observações Gerais da Oficina", key: "obsGerais", color: "text-slate-500" },
-               { label: "Serviços (Executados)", key: "servicosExecutados", color: "text-green-600", bg: "bg-green-50/30" },
-               { label: "Parecer Técnico", key: "parecer", color: "text-zinc-700" },
-               { label: "Peças e Lubrificantes", key: "pecas", color: "text-zinc-700" }
+               { label: "Serviços Solicitados pelo Cliente", key: "servicosSolicitados" as const, color: "text-blue-600" },
+               { label: "Observações Gerais da Oficina", key: "obsGerais" as const, color: "text-slate-500" },
+               { label: "Serviços (Executados)", key: "servicosExecutados" as const, color: "text-green-600", bg: "bg-green-50/30" },
+               { label: "Parecer Técnico", key: "parecer" as const, color: "text-zinc-700" },
+               { label: "Peças e Lubrificantes", key: "pecas" as const, color: "text-zinc-700" }
              ].map((area) => (
                <div key={area.key} className="flex flex-col gap-1">
                   <label className={`text-[10px] font-black ml-1 uppercase ${area.color}`}>{area.label}</label>
                   <textarea 
-                    value={(formData as any)[area.key]} 
-                    className={`w-full p-4 border border-slate-200 rounded-2xl min-h-[100px] outline-none focus:border-slate-400 transition-all ${area.bg || "bg-slate-50"}`}
+                    value={formData[area.key]} 
+                    className={`w-full p-4 border border-slate-200 rounded-2xl min-h-25 outline-none focus:border-slate-400 transition-all ${area.bg || "bg-slate-50"}`}
                     onChange={e => setFormData({...formData, [area.key]: e.target.value})} 
                   />
                </div>
