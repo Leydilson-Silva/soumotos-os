@@ -19,12 +19,11 @@ export default function HomePage() {
           icon="🎓"
           title="Matrícula de Aluno"
           description="Registrar novos alunos nos cursos."
-          disabled
         />
         <Card
-          icon="🔍"
-          title="Consultar Registros"
-          description="Visualizar histórico de O.S. e matrículas."
+          icon="🔧"
+          title="Manutenção"
+          description="Criar e gerenciar manutenções."
           disabled
         />
       </main>
