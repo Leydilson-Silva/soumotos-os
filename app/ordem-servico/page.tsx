@@ -139,6 +139,35 @@ export default function SOUMotosForm() {
       .join("\n");
   };
 
+  const gerarTermo = (comMarkdown: boolean = false) => {
+    const b = comMarkdown ? "*" : "";
+    const ul = comMarkdown ? "\n" : "";
+
+    let termo = `\n${ul}${b}═══════════════════════════════════════${b}${ul}`;
+    termo += `${ul}${b}TERMO DE CONSENTIMENTO, GUARDA E CONDIÇÕES DE SERVIÇO${b}${ul}`;
+    termo += `${ul}${b}═══════════════════════════════════════${b}${ul}\n`;
+    termo += `Para garantirmos total transparência e segurança na prestação dos nossos serviços, pedimos que leia atentamente as nossas condições de trabalho abaixo:\n`;
+
+    termo += `${ul}${b}1️⃣ VALIDADE DO ORÇAMENTO${b}${ul}`;
+    termo += `Todo orçamento emitido tem validade de 10 dias corridos (Art. 40, § 1º do CDC). Após esse prazo, os valores de peças e mão de obra podem sofrer alterações. O serviço só é iniciado após a sua aprovação.\n`;
+
+    termo += `${ul}${b}2️⃣ CONDIÇÕES DE PAGAMENTO${b}${ul}`;
+    termo += `O pagamento dos serviços aprovados segue o formato de ${b}50% de entrada${b} (sinal) para a aquisição imediata de peças, e os ${b}50% restantes${b} no ato da entrega da moto pronta. A liberação do veículo é vinculada à quitação do valor total.\n`;
+
+    termo += `${ul}${b}3️⃣ RETIRADA E TAXA DE PÁTIO${b}${ul}`;
+    termo += `Após avisarmos sobre a conclusão do serviço (ou emissão do orçamento sem aprovação), você tem ${b}5 dias úteis${b} para retirar a moto ${b}sem custos${b}. Passado esse prazo de tolerância, será cobrada uma taxa diária de pátio no valor de ${b}R$ 20,00/dia${b} de permanência, referente à guarda e ocupação de espaço físico.\n`;
+
+    termo += `${ul}${b}4️⃣ ABANDONO DE VEÍCULO${b}${ul}`;
+    termo += `Caso a moto permaneça na oficina por mais de ${b}90 dias (3 meses)${b} sem a sua manifestação, pagamento ou retirada, ela será configurada como ${b}BEM ABANDONADO${b} (Art. 1.275 do Código Civil e Lei nº 13.160/15).\n`;
+    termo += `Neste caso, a ${b}SouMotos${b} fica autorizada a vender ou leiloar o veículo para cobrir exclusivamente os custos de peças, mão de obra e taxas de pátio acumuladas.\n`;
+
+    termo += `${ul}${b}═══════════════════════════════════════${b}${ul}`;
+    termo += `${ul}${b}Ao prosseguir, você concorda com todos os termos acima.${b}${ul}`;
+    termo += `${b}Obrigado pela confiança na SouMotos! 🏍️${b}\n`;
+
+    return termo;
+  };
+
   const montarTextoFinal = (comMarkdown: boolean = false) => {
     const dataAtual = new Date().toLocaleDateString("pt-BR");
     const horaAtual = new Date().toLocaleTimeString("pt-BR", {
@@ -177,7 +206,8 @@ export default function SOUMotosForm() {
     texto += `\n${b}SERVIÇOS EXECUTADOS${b}\n${formatarComBullets(formData.servicosExecutados)}\n`;
     texto += `\n${b}PARECER TÉCNICO:${b}\n${formatarComBullets(formData.parecer)}\n`;
     texto += `\n${b}PEÇAS E LUBRIFICANTES:${b}\n${formatarComBullets(formData.pecas)}\n`;
-    
+    texto += gerarTermo(comMarkdown);
+
     return texto;
   };
 
