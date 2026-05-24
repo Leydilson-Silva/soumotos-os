@@ -4,7 +4,7 @@ import { FinanceiroData } from "../lib/types";
 
 interface ClausulaDoisProps {
   data: FinanceiroData;
-  onChange: (field: keyof FinanceiroData, value: string) => void;
+  onChange: (field: keyof FinanceiroData, value: string | number) => void;
 }
 
 export default function ClausulaDoisForm({ data, onChange }: ClausulaDoisProps) {
@@ -15,8 +15,8 @@ export default function ClausulaDoisForm({ data, onChange }: ClausulaDoisProps) 
       </h3>
       
       <div className="grid grid-cols-2 gap-4">
-        <Input label="Matrícula (R$)" value={data.matricula} onChange={(v) => onChange('matricula', v)} />
-        <Input label="Valor por Módulo (R$)" value={data.valorModulo} onChange={(v) => onChange('valorModulo', v)} />
+        <Input label="Matrícula (R$)" value={String(data.matricula)} onChange={(v) => onChange('matricula', Number(v) || 0)} />
+        <Input label="Valor por Módulo (R$)" value={String(data.valorModulo)} onChange={(v) => onChange('valorModulo', Number(v) || 0)} />
       </div>
 
       <div className="space-y-2">

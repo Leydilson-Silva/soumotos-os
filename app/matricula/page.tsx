@@ -46,8 +46,8 @@ export default function MatriculaPage() {
     periodoCurso: "",
     previsaoInicio: "",
     financeiro: {
-      matricula: "50,00",
-      valorModulo: "250,00",
+      matricula: 50,
+      valorModulo: 250,
       formaPagamento: "a_vista",
       observacao: "",
     },

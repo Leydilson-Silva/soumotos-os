@@ -1,9 +1,11 @@
 import React from 'react';
 
+type ColSpanClass = 'col-span-1' | 'col-span-2' | 'w-full' | '';
+
 interface InputProps {
   label: string;
   onChange: (v: string) => void;
-  colSpan?: string;
+  colSpan?: ColSpanClass;
   value?: string;
   type?: string;
 }

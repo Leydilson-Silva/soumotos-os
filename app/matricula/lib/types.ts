@@ -18,8 +18,8 @@ export interface ModuloInfo {
 }
 
 export interface FinanceiroData {
-  matricula: string;
-  valorModulo: string;
+  matricula: number;
+  valorModulo: number;
   formaPagamento: 'a_vista' | 'cartao' | 'boleto' | '';
   observacao: string;
 }

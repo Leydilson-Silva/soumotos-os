@@ -1,6 +1,10 @@
 import jsPDF from 'jspdf';
 import type { FormData, ContratanteData, AlunoData } from './types';
 
+const formatCurrency = (value: number): string => {
+  return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+};
+
 class PDFContext {
   doc: jsPDF;
   y: number;
@@ -276,7 +280,7 @@ function addClausulaDois(ctx: PDFContext, formData: FormData) {
   ctx.doc.text('O CONTRATANTE/ ALUNO se obriga a efetuar o pagamento do curso nas seguintes condições:', ctx.margin + 40, ctx.y);
   ctx.newLine(4);
 
-  ctx.doc.text(`Matricula : R$ ${formData.financeiro.matricula || '50,00'}.`, ctx.margin, ctx.y);
+  ctx.doc.text(`Matricula : ${formatCurrency(formData.financeiro.matricula)}.`, ctx.margin, ctx.y);
 
   ctx.doc.text('Forma de pagamento:', 76, ctx.y);
   ctx.doc.text('A vista', 114, ctx.y);
@@ -289,7 +293,7 @@ function addClausulaDois(ctx: PDFContext, formData: FormData) {
   if (formData.financeiro.formaPagamento === 'cartao') ctx.doc.text('X', 142.5, ctx.y + 0.3);
 
   ctx.newLine(4);
-  ctx.doc.text(`Valordo curso por cada módulo: R$ ${formData.financeiro.valorModulo || '250,00'}`, ctx.margin, ctx.y);
+  ctx.doc.text(`Valor do curso por cada módulo: ${formatCurrency(formData.financeiro.valorModulo)}`, ctx.margin, ctx.y);
 
   ctx.doc.text('Boleto: Entrada de R$ 400 + 4 Parcelasde R$200', 114, ctx.y);
   ctx.doc.rect(106, ctx.y - 2.9, 7, 4);
