@@ -129,10 +129,14 @@ export default function SOUMotosForm() {
     }
   };
 
-  const formatarLinhasManuais = (texto: string) => {
-    if (texto.trim() !== "") return texto;
-    // Retorna 4 linhas para o mecânico escrever à mão
-    return "________________________________________\n________________________________________\n________________________________________\n________________________________________";
+  const formatarComBullets = (texto: string) => {
+    if (texto.trim() === "") {
+      return "• \n• \n• \n• ";
+    }
+    return texto
+      .split("\n")
+      .map((line) => (line.trim() ? `• ${line}` : "• "))
+      .join("\n");
   };
 
   const montarTextoFinal = (comMarkdown: boolean = false) => {
@@ -168,11 +172,11 @@ export default function SOUMotosForm() {
       texto += `[ ${x} ] ${item}${obs}\n`;
     });
 
-    texto += `\n${b}SERVIÇOS SOLICITADOS PELO CLIENTE${b}\n${formatarLinhasManuais(formData.servicosSolicitados)}\n`;
-    texto += `\n${b}OBSERVAÇÕES GERAIS DA OFICINA${b}\n${formatarLinhasManuais(formData.obsGerais)}\n`;
-    texto += `\n${b}SERVIÇOS EXECUTADOS${b}\n${formatarLinhasManuais(formData.servicosExecutados)}\n`;
-    texto += `\n${b}PARECER TÉCNICO:${b}\n${formatarLinhasManuais(formData.parecer)}\n`;
-    texto += `\n${b}PEÇAS E LUBRIFICANTES:${b}\n${formatarLinhasManuais(formData.pecas)}\n`;
+    texto += `\n${b}SERVIÇOS SOLICITADOS PELO CLIENTE${b}\n${formatarComBullets(formData.servicosSolicitados)}\n`;
+    texto += `\n${b}OBSERVAÇÕES GERAIS DA OFICINA${b}\n${formatarComBullets(formData.obsGerais)}\n`;
+    texto += `\n${b}SERVIÇOS EXECUTADOS${b}\n${formatarComBullets(formData.servicosExecutados)}\n`;
+    texto += `\n${b}PARECER TÉCNICO:${b}\n${formatarComBullets(formData.parecer)}\n`;
+    texto += `\n${b}PEÇAS E LUBRIFICANTES:${b}\n${formatarComBullets(formData.pecas)}\n`;
     
     return texto;
   };
