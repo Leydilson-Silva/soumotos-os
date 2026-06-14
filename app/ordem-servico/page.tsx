@@ -36,6 +36,94 @@ interface EvidenceItem {
   previewUrl: string;
 }
 
+interface PersistedEvidenceItem {
+  id: string;
+  name: string;
+  type: string;
+  lastModified: number;
+  blob: Blob;
+}
+
+const EVIDENCE_DB_NAME = "soumotos-os";
+const EVIDENCE_STORE_NAME = "evidences";
+const EVIDENCE_RECORD_ID = "current";
+
+const openEvidenceDb = () =>
+  new Promise<IDBDatabase>((resolve, reject) => {
+    const request = indexedDB.open(EVIDENCE_DB_NAME, 1);
+
+    request.onupgradeneeded = () => {
+      const db = request.result;
+      if (!db.objectStoreNames.contains(EVIDENCE_STORE_NAME)) {
+        db.createObjectStore(EVIDENCE_STORE_NAME, { keyPath: "id" });
+      }
+    };
+
+    request.onerror = () => reject(request.error);
+    request.onsuccess = () => resolve(request.result);
+  });
+
+const loadPersistedEvidences = async (): Promise<PersistedEvidenceItem[]> => {
+  const db = await openEvidenceDb();
+
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(EVIDENCE_STORE_NAME, "readonly");
+    const store = tx.objectStore(EVIDENCE_STORE_NAME);
+    const request = store.get(EVIDENCE_RECORD_ID);
+
+    request.onerror = () => reject(request.error);
+    request.onsuccess = () => {
+      resolve((request.result?.items as PersistedEvidenceItem[]) || []);
+    };
+
+    tx.oncomplete = () => db.close();
+    tx.onerror = () => {
+      db.close();
+      reject(tx.error);
+    };
+  });
+};
+
+const savePersistedEvidences = async (items: PersistedEvidenceItem[]) => {
+  const db = await openEvidenceDb();
+
+  return new Promise<void>((resolve, reject) => {
+    const tx = db.transaction(EVIDENCE_STORE_NAME, "readwrite");
+    const store = tx.objectStore(EVIDENCE_STORE_NAME);
+    store.put({ id: EVIDENCE_RECORD_ID, items });
+
+    tx.oncomplete = () => {
+      db.close();
+      resolve();
+    };
+
+    tx.onerror = () => {
+      db.close();
+      reject(tx.error);
+    };
+  });
+};
+
+const clearPersistedEvidences = async () => {
+  const db = await openEvidenceDb();
+
+  return new Promise<void>((resolve, reject) => {
+    const tx = db.transaction(EVIDENCE_STORE_NAME, "readwrite");
+    const store = tx.objectStore(EVIDENCE_STORE_NAME);
+    store.delete(EVIDENCE_RECORD_ID);
+
+    tx.oncomplete = () => {
+      db.close();
+      resolve();
+    };
+
+    tx.onerror = () => {
+      db.close();
+      reject(tx.error);
+    };
+  });
+};
+
 const checklistItems = [
   "Pintura arranhada",
   "Amassado em carenagem",
@@ -111,10 +199,13 @@ export default function SOUMotosForm() {
   const [checklist, setChecklist] = useState<ChecklistState>(() => loadStoredChecklist());
   const [copiado, setCopiado] = useState(false);
   const [evidencias, setEvidencias] = useState<EvidenceItem[]>([]);
+  const [evidenciasCarregadas, setEvidenciasCarregadas] = useState(false);
   const [previewPdfUrl, setPreviewPdfUrl] = useState<string>("");
   const [previewLoading, setPreviewLoading] = useState(false);
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const folderInputRef = useRef<HTMLInputElement>(null);
+  const evidenciasRef = useRef<EvidenceItem[]>([]);
+  const previewPdfUrlRef = useRef("");
 
   useEffect(() => {
     try {
@@ -126,18 +217,80 @@ export default function SOUMotosForm() {
   }, [formData, checklist]);
 
   useEffect(() => {
-    return () => {
-      evidencias.forEach((item) => URL.revokeObjectURL(item.previewUrl));
-    };
+    evidenciasRef.current = evidencias;
   }, [evidencias]);
 
   useEffect(() => {
-    return () => {
-      if (previewPdfUrl) {
-        URL.revokeObjectURL(previewPdfUrl);
+    previewPdfUrlRef.current = previewPdfUrl;
+  }, [previewPdfUrl]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const carregarEvidencias = async () => {
+      try {
+        const itens = await loadPersistedEvidences();
+        if (cancelled) return;
+
+        const carregadas = itens.map((item) => ({
+          id: item.id,
+          file: new File([item.blob], item.name, {
+            type: item.type,
+            lastModified: item.lastModified,
+          }),
+          previewUrl: URL.createObjectURL(item.blob),
+        }));
+
+        setEvidencias(carregadas);
+      } catch {
+        if (!cancelled) {
+          setEvidencias([]);
+        }
+      } finally {
+        if (!cancelled) {
+          setEvidenciasCarregadas(true);
+        }
       }
     };
-  }, [previewPdfUrl]);
+
+    void carregarEvidencias();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!evidenciasCarregadas) {
+      return;
+    }
+
+    const persistir = async () => {
+      try {
+        const payload: PersistedEvidenceItem[] = evidencias.map((item) => ({
+          id: item.id,
+          name: item.file.name,
+          type: item.file.type,
+          lastModified: item.file.lastModified,
+          blob: item.file,
+        }));
+        await savePersistedEvidences(payload);
+      } catch {
+        // Se a persistência falhar, mantemos a sessão atual funcionando.
+      }
+    };
+
+    void persistir();
+  }, [evidencias, evidenciasCarregadas]);
+
+  useEffect(() => {
+    return () => {
+      evidenciasRef.current.forEach((item) => URL.revokeObjectURL(item.previewUrl));
+      if (previewPdfUrlRef.current) {
+        URL.revokeObjectURL(previewPdfUrlRef.current);
+      }
+    };
+  }, []);
 
   const handleCheckChange = (item: string) => {
     setChecklist((prev) => ({
@@ -155,7 +308,8 @@ export default function SOUMotosForm() {
 
   const limparFormulario = () => {
     if (confirm("Deseja limpar todos os campos da oficina?")) {
-      evidencias.forEach((item) => URL.revokeObjectURL(item.previewUrl));
+      evidenciasRef.current.forEach((item) => URL.revokeObjectURL(item.previewUrl));
+      void clearPersistedEvidences();
       setFormData({
         cliente: "",
         modelo: "",
@@ -177,6 +331,25 @@ export default function SOUMotosForm() {
       setEvidencias([]);
       localStorage.removeItem("soumotos_form");
       localStorage.removeItem("soumotos_check");
+    }
+  };
+
+  const limparEvidencias = async () => {
+    if (evidencias.length === 0) {
+      return;
+    }
+
+    if (!confirm("Deseja apagar apenas as evidências anexadas?")) {
+      return;
+    }
+
+    evidenciasRef.current.forEach((item) => URL.revokeObjectURL(item.previewUrl));
+    setEvidencias([]);
+
+    try {
+      await clearPersistedEvidences();
+    } catch {
+      // A sessão atual já foi limpa; a persistência será reescrita na próxima alteração.
     }
   };
 
@@ -831,7 +1004,7 @@ export default function SOUMotosForm() {
                     📎 Evidências em PDF
                   </h2>
                   <p className="text-xs text-slate-500 pl-3">
-                    Use a câmera do celular ou selecione uma pasta com fotos para montar o PDF.
+                    As fotos são salvas automaticamente neste dispositivo e voltam após recarregar a página.
                   </p>
                 </div>
                 <span className="text-[10px] font-bold px-2 py-1 rounded-full bg-slate-200 text-slate-700 whitespace-nowrap">
@@ -868,14 +1041,24 @@ export default function SOUMotosForm() {
                   onClick={abrirPickerCamera}
                   className="py-3 rounded-xl font-bold text-sm bg-slate-800 text-white hover:bg-slate-900 transition-colors"
                 >
-                  Tirar foto na câmera
+                  Abrir câmera
                 </button>
                 <button
                   type="button"
                   onClick={abrirPickerPasta}
                   className="py-3 rounded-xl font-bold text-sm bg-white border border-slate-300 text-slate-800 hover:bg-slate-100 transition-colors"
                 >
-                  Selecionar pasta de fotos
+                  Selecionar galeria/arquivos
+                </button>
+              </div>
+
+              <div className="flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={() => void limparEvidencias()}
+                  className="px-3 py-2 rounded-xl text-xs font-bold bg-red-50 text-red-700 hover:bg-red-100 transition-colors"
+                >
+                  Limpar evidências
                 </button>
               </div>
 
